@@ -1,0 +1,6 @@
+selenium
+undetected-chromedriver
+requests
+beautifulsoup4
+python-dotenv
+tqdm
