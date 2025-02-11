@@ -19,4 +19,4 @@ if __name__ == '__main__':
     if new_jobs:
         send_email(new_jobs)
         save_seen_jobs([job[1] for job in new_jobs])
-        print('Sent email with new jobs')
+        print(f'Sent email with {len(new_jobs)} new jobs')

@@ -10,3 +10,5 @@ Mistral
 GenAI
 Generative AI
 prompt
+NLP
+Natural Language Programming
