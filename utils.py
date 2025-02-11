@@ -50,7 +50,7 @@ def save_seen_jobs(jobs):
             f.write(job + '\n')
 
 
-SENDER_ADDRESS = os.getenv('SENDER_EMAIL')
+SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 SENDER_PASSWORD = os.getenv('SENDER_PASSWORD')
 RECIPIENT_EMAIL = os.getenv('RECIPIENT_EMAIL')
 
@@ -59,12 +59,10 @@ def send_email(new_jobs):
     subject = 'New Scraped Jobs'
     body = '\n\n'.join([f'{title}\n{link}\n{desc[:200]}...' for title, link, desc in new_jobs])
     body = body.encode('ascii', errors='ignore').decode()
-
     email_text = f'Subject: {subject}\n\n{body}'
 
     context = ssl.create_default_context()
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        # server.starttls()
-        server.login(SENDER_ADDRESS, SENDER_PASSWORD)
-        server.sendmail(SENDER_ADDRESS, SENDER_ADDRESS, email_text)
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, email_text)
