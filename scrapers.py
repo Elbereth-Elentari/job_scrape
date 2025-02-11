@@ -1,9 +1,10 @@
-import requests
-from bs4 import BeautifulSoup
+import time
 
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+
+from tqdm import tqdm
 
 from utils import cook_soup, filter_jobs
 
@@ -13,8 +14,8 @@ def scrape_4dayweek():
     
     soup, jobs = cook_soup('https://4dayweek.io/remote-jobs/data-science')
     
-    for job in soup.find_all('div', class_='job-tile'):
-        title = job.find('h3').text.strip()
+    for job in tqdm(soup.find_all('h3'), desc='4dayweek'):
+        title = job.find('a').text.strip()
         link = 'https://4dayweek.io' + job.find('a')['href']
         description = ''
         filter_jobs(title, link, description, jobs)
@@ -28,6 +29,7 @@ def scrape_linkedin():
     options.headless = True
     driver = uc.Chrome(options=options)
     driver.get('https://www.linkedin.com/jobs/search?keywords=remote%20llm')
+    time.sleep(5)
 
     try:
         next_pages = driver.find_elements(By.CLASS_NAME, 'artdeco-pagination__indicator')
@@ -40,15 +42,16 @@ def scrape_linkedin():
     while next_pages:
 
         try:
-            elements = driver.find_elements(By.CLASS_NAME, 'job-card-list__title-link')
-            for job in elements:
-                title = job.text.strip()
-                link = job.get_attribute('href')
+            elements = driver.find_elements(By.CLASS_NAME, 'job-card-list__entity-lockup')
+            for job in tqdm(elements, desc='linkedin'):
+                title = job.find_element(By.TAG_NAME, 'strong').text.strip()
+                link = job.find_element(By.TAG_NAME, 'a').get_attribute('href')
                 description = ''
                 jobs.append((title, link, description))
 
             next_page_button = next_pages.pop()
             next_page_button.click()
+            time.sleep(5)
 
         except:
             continue
@@ -62,9 +65,9 @@ def scrape_remoteok():
     
     soup, jobs = cook_soup('https://remoteok.com')
 
-    for job in soup.find_all('tr', class_='job'):
-        title = job.find('h2', itemprop='title')
-        link = job.find('a', class_='preventLink')
+    for job in tqdm(soup.find_all('a', class_='preventLink'), desc='remoteok'):
+        title = job.find('h2')
+        link = job
 
         if title and link:
             title = title.text.strip()
@@ -83,7 +86,7 @@ def scrape_wellfound():
 
     while next_page:
 
-        for job in soup.find_all('a', class_='text-brand-burgundy'):
+        for job in tqdm(soup.find_all('a', class_='mr-2'), desc='wellfound'):
             title = job
             link = job
 
@@ -92,7 +95,7 @@ def scrape_wellfound():
                 link = 'https://wellfound.com' + link['href']
                 description = ''
 
-                filter_jobs(title, link, description, jobs)
+                jobs.append((title, link, description))
 
         try:
             next_page = soup.find('li', class_='styles_next-rc-style__szoZ_').find('a')['href']
@@ -108,7 +111,7 @@ def scrape_ai_jobs():
 
     soup, jobs = cook_soup('https://aijobs.net/?cat=3&cat=18&cat=5&cat=15&cat=7&reg=7&key=&exp=&sal=')
 
-    for job in soup.find_all('div', class_='row'):
+    for job in tqdm(soup.find_all('div', class_='row'), desc='aijobs'):
         title = job.find('h5')
         link = job.find('a')
 
@@ -126,7 +129,7 @@ def scrape_datajobs():
 
     soup, jobs = cook_soup('https://datajobs.com/Llm-Jobs')
 
-    for job in soup.find_all('a'):
+    for job in tqdm(soup.find_all('a'), desc='datajobs'):
         title = job.find('strong')
         link = job
 
@@ -144,9 +147,9 @@ def scrape_remote_rocketship():
 
     soup, jobs = cook_soup('https://www.remoterocketship.com/jobs/jobTitle%3Dllm?page=1&sort=DateAdded&jobTitle=llm')
 
-    for job in soup.find_all('div', class_='items-start'):
+    for job in tqdm(soup.find_all('div', class_='p-6'), desc='remoterocketship'):
         title = job.find('h3')
-        link = job.find('a', href=True)
+        link = job.find('a')
         description = job.find('p')
 
         if title and link and description:
@@ -166,9 +169,9 @@ def scrape_indeed():
 
     while next_page:
 
-        for job in soup.find_all('div', class_='job_seen_beacon'):
-            title = job.find('h2', class_='jobTitle')
-            link = job.find('a', href=True)
+        for job in tqdm(soup.find_all('h2', class_='jobTitle'), desc='indeed'):
+            title = job.find('span')
+            link = job.find('a')
 
             if title and link:
                 title = title.text.strip()
@@ -191,9 +194,9 @@ def scrape_ziprecruiter_llm_jobs():
 
     soup, jobs = cook_soup('https://www.ziprecruiter.ie/jobs/search?l=Remote&q=Llm&remote=full')
 
-    for job in soup.find_all('li', class_='job-listing'):
+    for job in tqdm(soup.find_all('div', class_='jobList-intro'), desc='ziprecruiter'):
         title = job.find('strong')
-        link = job.find('a', href=True)
+        link = job
         description = job.find('div', class_='jobList-description')
 
         if title and link and description:
@@ -210,7 +213,7 @@ def scrape_nofluffjobs():
 
     soup, jobs = cook_soup('https://nofluffjobs.com/pl/praca-zdalna/artificial-intelligence')
 
-    for job in soup.find_all('a', class_='posting-list-item'):
+    for job in tqdm(soup.find_all('a', class_='posting-list-item'), desc='nofluffjobs'):
         title = job.find('h3')
         link = job
 
@@ -228,9 +231,9 @@ def scrape_pracuj():
 
     soup, jobs = cook_soup('https://it.pracuj.pl/praca/praca%20zdalna;wm,home-office?its=ai-ml')
 
-    for job in soup.find_all('h2', class_='tiles_hlp4o5k6'):
-        title = job.find('a')
-        link = title
+    for job in tqdm(soup.find_all('a', class_='tiles_o1859gd9'), desc='pracuj.pl'):
+        title = job
+        link = job
 
         if title and link:
             title = title.text.strip()

@@ -1,9 +1,10 @@
+from dotenv import load_dotenv
 import os
 import ssl
 import smtplib
+import time
 
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 import requests
 
 
@@ -18,6 +19,8 @@ def load_keywords(keywords_file: str):
 def cook_soup(url: str):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
+    time.sleep(5)
+
     return soup, []
 
 

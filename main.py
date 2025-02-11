@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     seen_jobs = load_seen_jobs()
     new_jobs = []
-    for scraper in tqdm(scrapers):
+    for scraper in tqdm(scrapers, desc='total'):
         jobs = scraper()
         for title, link, description in jobs:
             if link not in seen_jobs:
