@@ -206,5 +206,42 @@ def scrape_ziprecruiter_llm_jobs():
     return jobs
 
 
-scrapers = [scrape_4dayweek, scrape_linkedin, scrape_remoteok, scrape_wellfound, scrape_ai_jobs,
-            scrape_datajobs, scrape_remote_rocketship, scrape_indeed, scrape_ziprecruiter_llm_jobs]
+def scrape_nofluffjobs():
+
+    soup, jobs = cook_soup('https://nofluffjobs.com/pl/praca-zdalna/artificial-intelligence')
+
+    for job in soup.find_all('a', class_='posting-list-item'):
+        title = job.find('h3')
+        link = job
+
+        if title and link:
+            title = title.text.strip()
+            link = 'https://nofluffjobs.com' + link['href']
+            description = ''
+
+            jobs.append((title, link, description))
+
+    return jobs
+
+
+def scrape_pracuj():
+
+    soup, jobs = cook_soup('https://it.pracuj.pl/praca/praca%20zdalna;wm,home-office?its=ai-ml')
+
+    for job in soup.find_all('h2', class_='tiles_hlp4o5k6'):
+        title = job.find('a')
+        link = title
+
+        if title and link:
+            title = title.text.strip()
+            link = link['href']
+            description = ''
+
+            jobs.append((title, link, description))
+
+    return jobs
+
+
+
+scrapers = [scrape_4dayweek, scrape_linkedin, scrape_remoteok, scrape_wellfound, scrape_ai_jobs, scrape_datajobs,
+            scrape_remote_rocketship, scrape_indeed, scrape_ziprecruiter_llm_jobs, scrape_nofluffjobs, scrape_pracuj]
