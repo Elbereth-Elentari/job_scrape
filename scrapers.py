@@ -18,7 +18,7 @@ def scrape_4dayweek():
         title = job.find('a').text.strip()
         link = 'https://4dayweek.io' + job.find('a')['href']
         description = ''
-        filter_jobs(title, link, description, jobs)
+        jobs.append((title, link, description))
 
     return jobs
 
@@ -246,5 +246,8 @@ def scrape_pracuj():
 
 
 
-scrapers = [scrape_4dayweek, scrape_linkedin, scrape_remoteok, scrape_wellfound, scrape_ai_jobs, scrape_datajobs,
-            scrape_remote_rocketship, scrape_indeed, scrape_ziprecruiter_llm_jobs, scrape_nofluffjobs, scrape_pracuj]
+scrapers = [scrape_4dayweek,
+            # scrape_linkedin, scrape_remoteok, scrape_wellfound,
+            scrape_ai_jobs, scrape_datajobs,
+            # scrape_remote_rocketship, scrape_indeed, scrape_ziprecruiter_llm_jobs,
+            scrape_nofluffjobs, scrape_pracuj]
