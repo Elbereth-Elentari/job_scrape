@@ -28,17 +28,32 @@ def scrape_linkedin():
     options.headless = True
     driver = uc.Chrome(options=options)
     driver.get('https://www.linkedin.com/jobs/search?keywords=remote%20llm')
-    jobs = []
 
     try:
-        elements = driver.find_elements(By.CLASS_NAME, 'job-card-list__title-link')
-        for job in elements:
-            title = job.text.strip()
-            link = job.get_attribute('href')
-            description = ''
-            jobs.append((title, link, description))
-    finally:
-        driver.quit()
+        next_pages = driver.find_elements(By.CLASS_NAME, 'artdeco-pagination__indicator')
+        del next_pages[0]
+    except:
+        next_pages = [None]
+
+    jobs = []
+
+    while next_pages:
+
+        try:
+            elements = driver.find_elements(By.CLASS_NAME, 'job-card-list__title-link')
+            for job in elements:
+                title = job.text.strip()
+                link = job.get_attribute('href')
+                description = ''
+                jobs.append((title, link, description))
+
+            next_page_button = next_pages.pop()
+            next_page_button.click()
+
+        except:
+            continue
+
+    driver.quit()
 
     return jobs
 
@@ -63,22 +78,28 @@ def scrape_remoteok():
 
 def scrape_wellfound():
 
-    url = 'https://wellfound.com/jobs'
-    params = {'remote': 'true'}
-    response = requests.get(url, params=params)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    jobs = []
+    soup, jobs = cook_soup('https://wellfound.com/role/r/artificial-intelligence-engineer')
+    next_page = True
 
-    for job in soup.find_all('a', class_='styles_component__UCLp3'):
-        title = job
-        link = job
+    while next_page:
 
-        if title and link:
-            title = title.text.strip()
-            link = 'https://wellfound.com' + link['href']
-            description = ''
+        for job in soup.find_all('a', class_='text-brand-burgundy'):
+            title = job
+            link = job
 
-            filter_jobs(title, link, description, jobs)
+            if title and link:
+                title = title.text.strip()
+                link = 'https://wellfound.com' + link['href']
+                description = ''
+
+                filter_jobs(title, link, description, jobs)
+
+        try:
+            next_page = soup.find('li', class_='styles_next-rc-style__szoZ_').find('a')['href']
+            next_page_url = 'https://wellfound.com' + next_page
+            soup, _ = cook_soup(next_page_url)
+        except:
+            next_page = False
 
     return jobs
 
@@ -111,7 +132,7 @@ def scrape_datajobs():
 
         if title and link:
             title = title.text.strip()
-            link = link['href']
+            link = 'https://datajobs.com' + link['href']
             description = ''
 
             jobs.append((title, link, description))
@@ -130,7 +151,7 @@ def scrape_remote_rocketship():
 
         if title and link and description:
             title = title.text.strip()
-            link = link['href']
+            link = 'https://www.remoterocketship.com' + link['href']
             description = description.text.strip()
 
             jobs.append((title, link, description))
@@ -141,24 +162,34 @@ def scrape_remote_rocketship():
 def scrape_indeed():
 
     soup, jobs = cook_soup('https://www.indeed.com/jobs?q=llm&l=&sc=0kf%3Aattr%28DSQF7%29%3B&')
+    next_page = True
 
-    for job in soup.find_all('div', class_='job_seen_beacon'):
-        title = job.find('h2', class_='jobTitle')
-        link = job.find('a', href=True)
+    while next_page:
 
-        if title and link:
-            title = title.text.strip()
-            link = 'https://www.indeed.com' + link['href']
-            description = ''
+        for job in soup.find_all('div', class_='job_seen_beacon'):
+            title = job.find('h2', class_='jobTitle')
+            link = job.find('a', href=True)
 
-            filter_jobs(title, link, description, jobs)
+            if title and link:
+                title = title.text.strip()
+                link = 'https://www.indeed.com' + link['href']
+                description = ''
+
+                filter_jobs(title, link, description, jobs)
+
+        try:
+            next_page = soup.find('a', class_='css-17ffcjx')['href']
+            next_page_url = 'https://www.indeed.com' + next_page
+            soup, _ = cook_soup(next_page_url)
+        except:
+            next_page = False
 
     return jobs
 
 
 def scrape_ziprecruiter_llm_jobs():
 
-    soup, jobs = cook_soup('https://www.ziprecruiter.com/Jobs/Llm')
+    soup, jobs = cook_soup('https://www.ziprecruiter.ie/jobs/search?l=Remote&q=Llm&remote=full')
 
     for job in soup.find_all('li', class_='job-listing'):
         title = job.find('strong')

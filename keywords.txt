@@ -1,20 +1,11 @@
-remote
-4-day week
-4 days
-flexible
 LLM
 AI engineer
-data scientist
 MLOps
 ChatGPT
 DeepSeek
 Llama
-LlamaIndex
 Langchain
-ReACT
-RAG
-multi-agent
-AI agent
+agent
 Mistral
 GenAI
 Generative AI
